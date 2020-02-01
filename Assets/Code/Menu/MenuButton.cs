@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Button : MonoBehaviour {
+public class MenuButton : MonoBehaviour {
     [SerializeField] float offset;
 
     private Transform _startPos;

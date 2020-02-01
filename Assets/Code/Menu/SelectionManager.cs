@@ -17,7 +17,7 @@ public class SelectionManager : MonoBehaviour
             if (selection.CompareTag(selectableTag)) {
 
                 if (Input.GetMouseButtonDown(0)) {
-                    var button = selection.GetComponent<Button>();
+                    var button = selection.GetComponent<MenuButton>();
                     StartCoroutine(button.click());
                 }
                 
