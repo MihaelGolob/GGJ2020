@@ -12,7 +12,6 @@ public enum LocomotionLevel {
 public class AnimationController : MonoBehaviour {
 
     [SerializeField] private LocomotionLevel LocomotionLevel = LocomotionLevel.Walk;
-    [SerializeField] private float RaycastGroundDistance = 1f;
     [SerializeField] private bool IsGroundedFlag;
     [SerializeField] private bool IsPushingFlag;
     [SerializeField] private Vector3 JumpForce;
@@ -21,23 +20,29 @@ public class AnimationController : MonoBehaviour {
     private readonly int LocomotionHash = Animator.StringToHash("Locomotion");
     private Animator Animator;
     private Rigidbody Rigidbody;
+    private Grounded Grounded;
     private int Locomotion = 1;
     private int Orientation = 1;
     private int LastOrientation = 1;
-    private LayerMask Ground;
-    private Collider LastPushObject;
+    private Rigidbody LastPushObject;
 
     private void Awake() {
         Animator = GetComponent<Animator>();
         Rigidbody = GetComponent<Rigidbody>();
-        Ground = LayerMask.GetMask("Ground");
+        Grounded = GetComponentInChildren<Grounded>();
     }
 
     private void Update() {
+        CheckGround();
         ApplyLocomotionInput();
         ApplyOrientation();
         ApplyLocomotion();
         Jump();
+        UnsetPushing();
+    }
+
+    private void CheckGround() {
+        IsGroundedFlag = Grounded.IsGrounded;
     }
 
     private void ApplyLocomotionInput() {
@@ -45,7 +50,6 @@ public class AnimationController : MonoBehaviour {
         if (Input.GetButton("Horizontal") || Input.GetButton("Vertical")) {
             Locomotion = (int) LocomotionLevel;
         }
-
         Animator.SetInteger(LocomotionHash, Locomotion);
     }
 
@@ -54,9 +58,7 @@ public class AnimationController : MonoBehaviour {
         if (newOrientation != LastOrientation && Math.Abs(Input.GetAxisRaw("Vertical")) > 0.1f && IsGroundedFlag) {
             Orientation = newOrientation;
         }
-        var rotation = transform.rotation;
-        rotation = Quaternion.Euler(0, Orientation == -1 ? 180 : 0, 0);
-        transform.rotation = rotation;
+        transform.rotation = Quaternion.Euler(0, Orientation == -1 ? 180 : 0, 0);
         LastOrientation = Orientation;
     }
 
@@ -80,35 +82,34 @@ public class AnimationController : MonoBehaviour {
     }
 
     private void Jump() {
-        if (!IsGrounded()) return;
+        if (!IsGroundedFlag) return;
         if (!Input.GetButtonDown("Jump")) return;
-        Animator.SetTrigger(JumpHash);
-        var force = transform.forward;
-        force.y = JumpForce.y;
+        var force = new Vector3(0, 1, Orientation);
+        force.y *= JumpForce.y;
         force.z *= JumpForce.z;
-        Rigidbody.AddForce(force);
-    }
-
-    bool IsGrounded() {
-        var position = transform.position + transform.TransformDirection(Vector3.up) / 2;
-        Debug.DrawLine(position, position + Vector3.down * RaycastGroundDistance, Color.red);
-        IsGroundedFlag = Physics.Raycast(position, Vector3.down, out var hit, RaycastGroundDistance);
-        return IsGroundedFlag;
+        Rigidbody.AddForce(force, ForceMode.Impulse);
+        Animator.SetTrigger(JumpHash);
     }
 
     void Push(Collider other) {
-        if (Input.GetButton("Push") && other.tag == "Pushable") {
+        if (Input.GetButton("Push") && other.CompareTag("Pushable")) {
             IsPushingFlag = true;
             Animator.SetBool(PushHash, true);
             other.GetComponent<Rigidbody>().mass = 0.01f;
+            LastPushObject = other.GetComponent<Rigidbody>();
         } else {
             IsPushingFlag = false;
             Animator.SetBool(PushHash, false);
         }
     }
 
+    private void UnsetPushing() {
+        if (LastPushObject != null && !IsPushingFlag) {
+            LastPushObject.mass = 100_000;
+        }
+    }
+
     private void OnTriggerEnter(Collider other) {
-        LastPushObject = other;
         Push(other);
     }
 
@@ -118,7 +119,7 @@ public class AnimationController : MonoBehaviour {
 
     private void OnTriggerExit(Collider other) {
         Animator.SetBool(PushHash, false);
-        other.GetComponent<Rigidbody>().mass = 100000;
+        if (LastPushObject != null) LastPushObject.mass = 100_000;
     }
 
 }
