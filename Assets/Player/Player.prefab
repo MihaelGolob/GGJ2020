@@ -170,7 +170,7 @@ GameObject:
   - component: {fileID: 966578333799311041}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -251,10 +251,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.86
-  m_Height: 3.08
+  m_Radius: 0.51576555
+  m_Height: 3.174541
   m_Direction: 1
-  m_Center: {x: 0, y: 1.64, z: 0.81}
+  m_Center: {x: 0, y: 1.5927293, z: 0.4657656}
 --- !u!114 &966578333799311041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -267,11 +267,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3238d56d07c71254d8d05c10475e3478, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Level: 4
   LocomotionLevel: 1
+  DanceMove: 1
   IsGroundedFlag: 0
   IsPushingFlag: 0
   JumpForce: {x: 0, y: 7, z: 3}
-  DanceMove: 1
   Dance: 0
 --- !u!1 &966578333836977168
 GameObject:
