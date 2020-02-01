@@ -1,16 +1,33 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UIElements;
+using UnityEngine.Windows.Speech;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
+[RequireComponent(typeof(CharacterController))]
 public class EnemyMovement : MonoBehaviour {
+    [SerializeField] private float speed;
+    [SerializeField] private Transform start;
+    [SerializeField] private Transform target;
+    
     private CharacterController _controller;
     private Animator _animator;
+
+    private int _gravityForce;
+    Vector3 _direction = new Vector3(0, 0, 1);
 
     private void Start() {
         _controller = GetComponent<CharacterController>();
         _animator = GetComponent<Animator>();
+
+        _gravityForce = 3;
+
+        transform.position = start.position;
     }
 
     private void Update() {
@@ -18,7 +35,21 @@ public class EnemyMovement : MonoBehaviour {
     }
 
     private void move() {
-        Vector2 Movement = new Vector2(1, 0);
+        Vector3 gravity = Vector3.zero;
+
+        if (!_controller.isGrounded) {
+            gravity.y -= _gravityForce;
+        }
         
+        _controller.Move(_direction * speed * Time.deltaTime);
+        _controller.Move(gravity * Time.deltaTime);
+
+        if (Mathf.Abs(transform.position.z - target.position.z) <= 0.1f) {
+            _direction = -_direction;
+            Vector3 tmp = start.position;
+            start.position = target.position;
+            target.position = tmp;
+            transform.localRotation *= Quaternion.Euler(0, 180, 0);
+        }
     }
 }
