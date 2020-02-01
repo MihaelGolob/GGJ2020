@@ -12,6 +12,9 @@ public enum LocomotionLevel {
 public class AnimationController : MonoBehaviour {
 
     [SerializeField] private LocomotionLevel LocomotionLevel = LocomotionLevel.Walk;
+    [SerializeField] private float RaycastGroundDistance = 1f;
+    [SerializeField] private bool IsGroundedFlag;
+    [SerializeField] private Vector3 JumpForce;
     private readonly int PushHash = Animator.StringToHash("Push");
     private readonly int JumpHash = Animator.StringToHash("Jump");
     private readonly int LocomotionHash = Animator.StringToHash("Locomotion");
@@ -20,10 +23,12 @@ public class AnimationController : MonoBehaviour {
     private int Locomotion = 1;
     private int Orientation = 1;
     private int LastOrientation = 1;
+    private LayerMask Ground;
 
     private void Awake() {
         Animator = GetComponent<Animator>();
         Rigidbody = GetComponent<Rigidbody>();
+        Ground = LayerMask.GetMask("Ground");
     }
 
     private void Update() {
@@ -34,20 +39,17 @@ public class AnimationController : MonoBehaviour {
     }
 
     private void Jump() {
-        if(Rigidbody.)
+        if (!IsGrounded()) return;
+        if (!Input.GetButtonDown("Jump")) return;
+        JumpForce.z *= Orientation;
+        Rigidbody.AddForce(JumpForce);
     }
-    
+
     bool IsGrounded() {
-        Vector2 position = transform.position;
-        Vector2 direction = Vector2.down;
-        float distance = 1.0f;
-    
-        RaycastHit2D hit = Physics2D.Raycast(position, direction, distance, groundLayer);
-        if (hit.collider != null) {
-            return true;
-        }
-    
-        return false;
+        var position = transform.position + transform.TransformDirection(Vector3.up) / 2;
+        Debug.DrawLine(position, position + Vector3.down * RaycastGroundDistance, Color.red);
+        IsGroundedFlag = Physics.Raycast(position, Vector3.down, out var hit, RaycastGroundDistance);
+        return IsGroundedFlag;
     }
 
     private void ApplyLocomotionInput() {
@@ -67,11 +69,11 @@ public class AnimationController : MonoBehaviour {
 
     private void ApplyOrientation() {
         int newOrientation = Input.GetAxisRaw("Vertical") > 0 ? 1 : -1;
-        if (newOrientation != LastOrientation && Math.Abs(Input.GetAxisRaw("Vertical")) > 0.1f) {
+        if (newOrientation != LastOrientation && Math.Abs(Input.GetAxisRaw("Vertical")) > 0.1f && IsGroundedFlag) {
             Orientation = newOrientation;
         }
         var rotation = transform.rotation;
-        rotation = Quaternion.Euler(rotation.eulerAngles.x, Orientation == -1 ? 180 : 0, rotation.eulerAngles.z);
+        rotation = Quaternion.Euler(0, Orientation == -1 ? 180 : 0, 0);
         transform.rotation = rotation;
         LastOrientation = Orientation;
     }
