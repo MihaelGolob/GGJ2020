@@ -182,7 +182,7 @@ public class AnimationController : MonoBehaviour {
 
 #region AnimationEvents
 
-    void InstantiateBulletsEvent() {
+    void ThrowApple() {
         var bullets = Instantiate(Bullets);
         foreach (var bullet in bullets.GetComponentsInChildren<Rigidbody>()) {
             if (bullet.gameObject.CompareTag("Bullet")) {
