@@ -14,6 +14,7 @@ public class AnimationController : MonoBehaviour {
     [SerializeField] private LocomotionLevel LocomotionLevel = LocomotionLevel.Walk;
     [SerializeField] private float RaycastGroundDistance = 1f;
     [SerializeField] private bool IsGroundedFlag;
+    [SerializeField] private bool IsPushingFlag;
     [SerializeField] private Vector3 JumpForce;
     private readonly int PushHash = Animator.StringToHash("Push");
     private readonly int JumpHash = Animator.StringToHash("Jump");
@@ -24,6 +25,7 @@ public class AnimationController : MonoBehaviour {
     private int Orientation = 1;
     private int LastOrientation = 1;
     private LayerMask Ground;
+    private Collider LastPushObject;
 
     private void Awake() {
         Animator = GetComponent<Animator>();
@@ -38,34 +40,12 @@ public class AnimationController : MonoBehaviour {
         Jump();
     }
 
-    private void Jump() {
-        if (!IsGrounded()) return;
-        if (!Input.GetButtonDown("Jump")) return;
-        var force = transform.forward;
-        force.y = JumpForce.y;
-        force.z *= JumpForce.z;
-        Rigidbody.AddForce(force);
-    }
-
-    bool IsGrounded() {
-        var position = transform.position + transform.TransformDirection(Vector3.up) / 2;
-        Debug.DrawLine(position, position + Vector3.down * RaycastGroundDistance, Color.red);
-        IsGroundedFlag = Physics.Raycast(position, Vector3.down, out var hit, RaycastGroundDistance);
-        return IsGroundedFlag;
-    }
-
     private void ApplyLocomotionInput() {
         Locomotion = 0;
-        Animator.SetBool(PushHash, false);
-        if (Input.GetButton("Push")) {
-            Animator.SetBool(PushHash, true);
-        } else if (Input.GetButtonDown("Jump")) {
-            Animator.SetTrigger(JumpHash);
-        }
-
         if (Input.GetButton("Horizontal") || Input.GetButton("Vertical")) {
             Locomotion = (int) LocomotionLevel;
         }
+
         Animator.SetInteger(LocomotionHash, Locomotion);
     }
 
@@ -97,6 +77,48 @@ public class AnimationController : MonoBehaviour {
             }
             return 1f;
         }
+    }
+
+    private void Jump() {
+        if (!IsGrounded()) return;
+        if (!Input.GetButtonDown("Jump")) return;
+        Animator.SetTrigger(JumpHash);
+        var force = transform.forward;
+        force.y = JumpForce.y;
+        force.z *= JumpForce.z;
+        Rigidbody.AddForce(force);
+    }
+
+    bool IsGrounded() {
+        var position = transform.position + transform.TransformDirection(Vector3.up) / 2;
+        Debug.DrawLine(position, position + Vector3.down * RaycastGroundDistance, Color.red);
+        IsGroundedFlag = Physics.Raycast(position, Vector3.down, out var hit, RaycastGroundDistance);
+        return IsGroundedFlag;
+    }
+
+    void Push(Collider other) {
+        if (Input.GetButton("Push") && other.tag == "Pushable") {
+            IsPushingFlag = true;
+            Animator.SetBool(PushHash, true);
+            other.GetComponent<Rigidbody>().mass = 0.01f;
+        } else {
+            IsPushingFlag = false;
+            Animator.SetBool(PushHash, false);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        LastPushObject = other;
+        Push(other);
+    }
+
+    private void OnTriggerStay(Collider other) {
+        Push(other);
+    }
+
+    private void OnTriggerExit(Collider other) {
+        Animator.SetBool(PushHash, false);
+        other.GetComponent<Rigidbody>().mass = 100000;
     }
 
 }
