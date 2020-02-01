@@ -2655,7 +2655,7 @@ MonoBehaviour:
   LocomotionLevel: 1
   RaycastGroundDistance: 1
   IsGroundedFlag: 0
-  JumpForce: {x: 0, y: 500, z: 300}
+  JumpForce: {x: 0, y: 300, z: 150}
 --- !u!136 &8296172667832851239
 CapsuleCollider:
   m_ObjectHideFlags: 0

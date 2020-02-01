@@ -41,8 +41,10 @@ public class AnimationController : MonoBehaviour {
     private void Jump() {
         if (!IsGrounded()) return;
         if (!Input.GetButtonDown("Jump")) return;
-        JumpForce.z *= Orientation;
-        Rigidbody.AddForce(JumpForce);
+        var force = transform.forward;
+        force.y = JumpForce.y;
+        force.z *= JumpForce.z;
+        Rigidbody.AddForce(force);
     }
 
     bool IsGrounded() {
