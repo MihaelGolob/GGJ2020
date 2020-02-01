@@ -1,5 +1,16 @@
 ﻿using System;
+using UnityEditor;
 using UnityEngine;
+
+public enum Level {
+
+    Walk,
+    Run,
+    Jump,
+    Push,
+    Shoot
+
+}
 
 public enum LocomotionLevel {
 
@@ -9,15 +20,26 @@ public enum LocomotionLevel {
 
 }
 
+public enum DanceMove {
+
+    Belly = 1
+
+}
+
 public class AnimationController : MonoBehaviour {
 
+    [SerializeField] private Level Level = Level.Shoot;
     [SerializeField] private LocomotionLevel LocomotionLevel = LocomotionLevel.Walk;
+    [SerializeField] private DanceMove DanceMove = DanceMove.Belly;
     [SerializeField] private bool IsGroundedFlag;
     [SerializeField] private bool IsPushingFlag;
     [SerializeField] private Vector3 JumpForce;
+    [SerializeField] private bool Dance;
     private readonly int PushHash = Animator.StringToHash("Push");
     private readonly int JumpHash = Animator.StringToHash("Jump");
     private readonly int LocomotionHash = Animator.StringToHash("Locomotion");
+    private readonly int DanceHash = Animator.StringToHash("Dance");
+    private readonly int ShootHash = Animator.StringToHash("Shoot");
     private Animator Animator;
     private Rigidbody Rigidbody;
     private Grounded Grounded;
@@ -39,6 +61,8 @@ public class AnimationController : MonoBehaviour {
         ApplyLocomotion();
         Jump();
         UnsetPushing();
+        MakeOneDanceMove();
+        Shoot();
     }
 
     private void CheckGround() {
@@ -106,6 +130,21 @@ public class AnimationController : MonoBehaviour {
     private void UnsetPushing() {
         if (LastPushObject != null && !IsPushingFlag) {
             LastPushObject.mass = 100_000;
+        }
+    }
+
+    private void MakeOneDanceMove() {
+        Animator.SetInteger(DanceHash, 0);
+        if (!Dance) return;
+
+        Animator.SetInteger(DanceHash, (int) DanceMove);
+        Dance = false;
+    }
+
+    private void Shoot() {
+        if (Level < Level.Run) return;
+        if (Input.GetButtonDown("Fire1")) {
+            Animator.SetTrigger(ShootHash);
         }
     }
 
