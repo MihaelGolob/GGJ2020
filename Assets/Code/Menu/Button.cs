@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Button : MonoBehaviour {
     [SerializeField] float offset;
-    
+
     private Transform _startPos;
-    
+
     // Start is called before the first frame update
     void Start() {
         _startPos = transform;
