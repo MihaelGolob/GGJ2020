@@ -35,6 +35,9 @@ public class AnimationController : MonoBehaviour {
     [SerializeField] private bool IsPushingFlag;
     [SerializeField] private Vector3 JumpForce;
     [SerializeField] private bool Dance;
+    [SerializeField] private GameObject Bullets;
+    [SerializeField] private Vector3 BulletOffset;
+    [SerializeField] private float BulletForce;
     private readonly int PushHash = Animator.StringToHash("Push");
     private readonly int JumpHash = Animator.StringToHash("Jump");
     private readonly int LocomotionHash = Animator.StringToHash("Locomotion");
@@ -168,7 +171,16 @@ public class AnimationController : MonoBehaviour {
 #region AnimationEvents
 
     void InstantiateBulletsEvent() {
-        Debug.Log("Shoot");
+        var bullets = Instantiate(Bullets);
+        foreach (var bullet in bullets.GetComponentsInChildren<Rigidbody>()) {
+            if (bullet.gameObject.CompareTag("Bullet")) {
+                var transform = this.transform;
+                var forward = transform.forward;
+                bullet.transform.position = transform.position + forward * BulletOffset.z + transform.up * BulletOffset.y;
+                bullet.AddForce(forward * BulletForce, ForceMode.Impulse);
+            }
+
+        }
     }
 
 #endregion
