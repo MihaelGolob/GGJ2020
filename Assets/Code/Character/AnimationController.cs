@@ -148,6 +148,8 @@ public class AnimationController : MonoBehaviour {
         }
     }
 
+#region Collsions
+
     private void OnTriggerEnter(Collider other) {
         Push(other);
     }
@@ -160,5 +162,15 @@ public class AnimationController : MonoBehaviour {
         Animator.SetBool(PushHash, false);
         if (LastPushObject != null) LastPushObject.mass = 100_000;
     }
+
+#endregion
+
+#region AnimationEvents
+
+    void InstantiateBulletsEvent() {
+        Debug.Log("Shoot");
+    }
+
+#endregion
 
 }
