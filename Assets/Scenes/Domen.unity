@@ -225,7 +225,8 @@ GameObject:
   - component: {fileID: 691437483}
   - component: {fileID: 691437482}
   - component: {fileID: 691437481}
-  m_Layer: 0
+  - component: {fileID: 691437485}
+  m_Layer: 8
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -301,11 +302,27 @@ Transform:
   m_GameObject: {fileID: 691437480}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 4.3447266, y: -2.19, z: 12.841797}
-  m_LocalScale: {x: 22.629475, y: 1, z: 46.3189}
+  m_LocalScale: {x: 22.629475, y: 0.21, z: 46.3189}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &691437485
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 691437480}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &805982936
 GameObject:
   m_ObjectHideFlags: 0
@@ -2636,6 +2653,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LocomotionLevel: 1
+  RaycastGroundDistance: 1
+  IsGroundedFlag: 0
+  JumpForce: {x: 0, y: 300, z: 150}
 --- !u!136 &8296172667832851239
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2699,6 +2719,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LocomotionLevel: 1
+  RaycastGroundDistance: 0.3
+  IsGroundedFlag: 0
+  JumpForce: {x: 0, y: 0, z: 0}
 --- !u!54 &8296172667991711919
 Rigidbody:
   m_ObjectHideFlags: 0
