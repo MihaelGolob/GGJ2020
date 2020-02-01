@@ -7,15 +7,12 @@ using UnityEngine;
 
 public class disappearing_platform : MonoBehaviour {
     [SerializeField] private float transitionTime;
-
-    private Renderer _renderer;
+    
     private bool _triggered;
     private float _startScaleX;
     
     // Start is called before the first frame update
-    void Start()
-    {
-        _renderer = GetComponent<Renderer>();
+    void Start() {
         _triggered = false;
         _startScaleX = transform.localScale.x;
     }
