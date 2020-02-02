@@ -41,6 +41,9 @@ public class MenuButton : MonoBehaviour {
             Debug.Log("show credits");
             _timeline.Play();
         }
+        else if (transform.name == "Tutorial") {
+            SceneManager.LoadScene("Tutorial");
+        }
         else if (transform.name.Substring(0, 5) == "Level") {
             Debug.Log("launch level");
             SceneManager.LoadScene("Level" + transform.name[5]);
