@@ -468,6 +468,8 @@ MonoBehaviour:
   BulletOffset: {x: 0, y: 3, z: 1}
   BulletForce: 40
   DisableLocomotion: 0
+  FOVMax: 80
+  FOVMin: 30
 --- !u!1 &966578333836977168
 GameObject:
   m_ObjectHideFlags: 0

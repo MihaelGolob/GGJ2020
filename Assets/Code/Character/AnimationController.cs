@@ -41,6 +41,8 @@ public class AnimationController : MonoBehaviour {
     [SerializeField] private Vector3 BulletOffset;
     [SerializeField] private float BulletForce;
     [SerializeField] private bool DisableLocomotion;
+    [SerializeField] private float FOVMax = 100;
+    [SerializeField] private float FOVMin = 30;
     private readonly int PushHash = Animator.StringToHash("Push");
     private readonly int JumpHash = Animator.StringToHash("Jump");
     private readonly int LocomotionHash = Animator.StringToHash("Locomotion");
@@ -52,6 +54,7 @@ public class AnimationController : MonoBehaviour {
     private Grounded Grounded;
     private SoundManager SoundManager;
     private Transform[] AllArmour;
+    private Camera Camera;
     private int Locomotion = 1;
     private int Orientation = 1;
     private int LastOrientation = 1;
@@ -62,9 +65,10 @@ public class AnimationController : MonoBehaviour {
         Rigidbody = GetComponent<Rigidbody>();
         Grounded = GetComponentInChildren<Grounded>();
         SoundManager = FindObjectOfType<SceneConfiguration>().SoundManager;
-        LoadLevelStatus();
         FindAllArmour();
         HideAllArmour();
+        SetMinZoom();
+        LoadLevelStatus();
     }
 
     void FindAllArmour() {
@@ -75,6 +79,11 @@ public class AnimationController : MonoBehaviour {
         foreach (var armour in AllArmour) {
             armour.GetChild(0).localScale = Vector3.zero;
         }
+    }
+
+    void SetMinZoom() {
+        Camera = FindObjectOfType<Camera>();
+        Camera.fieldOfView = FOVMin;
     }
 
     private void Update() {
@@ -89,6 +98,7 @@ public class AnimationController : MonoBehaviour {
             Shoot();
         }
         MakeOneDanceMove();
+        ZoomInOut();
     }
 
     private void CheckGround() {
@@ -164,6 +174,18 @@ public class AnimationController : MonoBehaviour {
         Dance = false;
     }
 
+    private void ZoomInOut() {
+        if (Input.GetKey(KeyCode.Q)) {
+            if (Camera.fieldOfView < FOVMax) {
+                Camera.fieldOfView += Time.deltaTime * 70;
+            }
+        } else {
+            if (Camera.fieldOfView > FOVMin) {
+                Camera.fieldOfView -= Time.deltaTime * 70;
+            }
+        }
+    }
+
     private void Shoot() {
         if (Level < Level.Shoot) return;
         if (Input.GetButtonDown("Fire1")) {
@@ -221,6 +243,7 @@ public class AnimationController : MonoBehaviour {
 
     void JumpSound() {
         SoundManager.PlayRandomThemeSound("jump", 0.3f);
+        if (ProbabilityChance(12f)) SoundManager.PlayRandomThemeSound("fart", 1f);
     }
 
     void PushingSound() {
@@ -274,11 +297,13 @@ public class AnimationController : MonoBehaviour {
 
     private void LoadLevelStatus() {
         var level = PlayerPrefs.GetInt("LevelStatus", 0);
+        if (level == 0) return;
         LevelUp((Level) level);
     }
 
     private IEnumerator ShowArmour(string name) {
         var armourToShow = AllArmour.Where(t => t.name.Contains(name));
+        if (!armourToShow.Any()) yield break;
 
         var scale = 0f;
         while (scale < 1) {
@@ -291,5 +316,9 @@ public class AnimationController : MonoBehaviour {
     }
 
 #endregion
+
+    private bool ProbabilityChance(float percentage) {
+        return new System.Random().Next(0, 1_000_000) <= percentage * 10_000;
+    }
 
 }
