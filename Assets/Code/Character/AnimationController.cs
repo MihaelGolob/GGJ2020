@@ -208,6 +208,10 @@ public class AnimationController : MonoBehaviour {
         SoundManager.PlayRandomThemeSound("jump", 0.3f);
     }
 
+    void PushingSound() {
+        SoundManager.PlayRandomThemeSound("pushing", 0.1f);
+    }
+
 #endregion
 
 #region Leveling Up and Down

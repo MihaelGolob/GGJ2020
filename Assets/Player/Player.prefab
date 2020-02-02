@@ -268,7 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3238d56d07c71254d8d05c10475e3478, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Level: 4
+  Level: 3
   LocomotionLevel: 3
   DanceMove: 1
   IsGroundedFlag: 0
@@ -945,7 +945,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f30d71ddc1745d9469ac23d8423146ce, type: 2}
+  - {fileID: 2100000, guid: ba1523ce43aac1d449b7f54e89b1ee8e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
