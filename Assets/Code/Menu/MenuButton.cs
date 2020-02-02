@@ -47,6 +47,7 @@ public class MenuButton : MonoBehaviour {
         else if (transform.name == "quit") {
             // credit methods
             Debug.Log("quit");
+            Application.Quit();
             //_timeline.Play();
         }
         else if (transform.name == "back") {
