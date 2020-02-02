@@ -9,14 +9,25 @@ public class Switch : MonoBehaviour {
 
     private Vector3 _startPos;
     private bool _pressed;
+    private bool _pressedBox;
+    private bool _pressedPlayer;
 
     private void Start() {
         _startPos = transform.position;
         _pressed = false;
+        _pressedBox = false;
+        _pressedPlayer = false;
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (!_pressed && other.CompareTag("Player")) {
+        if (other.CompareTag("Player")) {
+            _pressedPlayer = true;
+        }
+        else if (other.CompareTag("Pushable")) {
+            _pressedBox = true;
+        }
+        
+        if (!_pressed && (_pressedPlayer || _pressedBox)) {
             _pressed = true;
             StartCoroutine(buttonDown());
 
@@ -32,7 +43,14 @@ public class Switch : MonoBehaviour {
     }
 
     private void OnTriggerExit(Collider other) {
-        if (_pressed && other.CompareTag("Player")) {
+        if (other.CompareTag("Player")) {
+            _pressedPlayer = false;
+        }
+        else if (other.CompareTag("Pushable")) {
+            _pressedBox = false;
+        }
+        
+        if (_pressed && (!_pressedPlayer && !_pressedBox)) {
             _pressed = false;
             StartCoroutine(buttonUp());
 

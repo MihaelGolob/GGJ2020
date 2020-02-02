@@ -16,7 +16,7 @@ public class Button : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (!_pressed && other.CompareTag("Player")) {
+        if (!_pressed && (other.CompareTag("Player") || other.CompareTag("Pushable"))) {
             StartCoroutine(buttonDown());
             
             var liftable = door.GetComponent<Liftable>();
