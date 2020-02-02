@@ -71,9 +71,9 @@ public class AnimationController : MonoBehaviour {
             Jump();
             SetPushButtonDown();
             UnsetPushing();
-            MakeOneDanceMove();
             Shoot();
         }
+        MakeOneDanceMove();
     }
 
     private void CheckGround() {

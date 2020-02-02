@@ -91,6 +91,11 @@ namespace Code {
             PlayClip(clip, volume);
         }
 
+        public void PlayTutorialSound(int tutorialNumber, float volume) {
+            var clip = _clips.First(c => c.name.Contains($"tutorial_{tutorialNumber}"));
+            PlayClip(clip.name, volume);
+        }
+
     }
 
 }
