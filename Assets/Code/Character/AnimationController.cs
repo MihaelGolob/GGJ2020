@@ -1,5 +1,5 @@
 ﻿using System;
-using UnityEditor;
+using Code;
 using UnityEngine;
 
 public enum Level {
@@ -48,6 +48,7 @@ public class AnimationController : MonoBehaviour {
     private Rigidbody Rigidbody;
     private Rigidbody LastPushObject;
     private Grounded Grounded;
+    private SoundManager SoundManager;
     private int Locomotion = 1;
     private int Orientation = 1;
     private int LastOrientation = 1;
@@ -57,6 +58,8 @@ public class AnimationController : MonoBehaviour {
         Animator = GetComponent<Animator>();
         Rigidbody = GetComponent<Rigidbody>();
         Grounded = GetComponentInChildren<Grounded>();
+        SoundManager = FindObjectOfType<SceneConfiguration>().SoundManager;
+        LoadLevelStatus();
     }
 
     private void Update() {
@@ -115,6 +118,7 @@ public class AnimationController : MonoBehaviour {
     }
 
     private void Jump() {
+        if (Level < Level.Jump) return;
         if (!IsGroundedFlag) return;
         if (!Input.GetButtonDown("Jump")) return;
         var force = new Vector3(0, 1, Orientation);
@@ -146,7 +150,7 @@ public class AnimationController : MonoBehaviour {
     }
 
     private void Shoot() {
-        if (Level < Level.Run) return;
+        if (Level < Level.Shoot) return;
         if (Input.GetButtonDown("Fire1")) {
             Animator.SetTrigger(ShootHash);
         }
@@ -168,7 +172,7 @@ public class AnimationController : MonoBehaviour {
     }
 
     void Push(Collider other) {
-        if ((PushButtonDown || Input.GetButton("Push") || Input.GetKey(KeyCode.K) || Input.GetKey(KeyCode.Mouse2)) && other.CompareTag("Pushable")) {
+        if ((PushButtonDown || Input.GetButton("Push")) && other.CompareTag("Pushable") && Level >= Level.Push) {
             IsPushingFlag = true;
             Animator.SetBool(PushHash, true);
             other.GetComponent<Rigidbody>().mass = 0.01f;
@@ -194,6 +198,48 @@ public class AnimationController : MonoBehaviour {
             }
 
         }
+    }
+
+    void FootSound() {
+        SoundManager.PlayRandomThemeSound("grass", 0.1f);
+    }
+
+    void JumpSound() {
+        SoundManager.PlayRandomThemeSound("jump", 0.3f);
+    }
+
+#endregion
+
+#region Leveling Up and Down
+
+    public void LevelUp(Level level) {
+        Level = level;
+        switch (level) {
+            case Level.Run:
+                LocomotionLevel = LocomotionLevel.OldRun;
+                break;
+            case Level.Jump:
+            case Level.Push:
+            case Level.Shoot:
+                LocomotionLevel = LocomotionLevel.Run;
+                break;
+        }
+        SaveLevelStatus();
+    }
+
+    public void ResetAllLevels() {
+        Level = Level.Walk;
+        LocomotionLevel = LocomotionLevel.Walk;
+        SaveLevelStatus();
+    }
+
+    private void SaveLevelStatus() {
+        PlayerPrefs.SetInt("LevelStatus", (int) Level);
+    }
+
+    private void LoadLevelStatus() {
+        var level = PlayerPrefs.GetInt("LevelStatus", 0);
+        LevelUp((Level) level);
     }
 
 #endregion

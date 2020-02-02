@@ -3,9 +3,11 @@ using System.Linq;
 using UnityEngine;
 
 namespace Code {
+
     public class SoundManager {
-        private const    string          AUDIO_SOURCE_NAME = "AudioSource";
-        private readonly AudioSource[]   _pool             = new AudioSource[10];
+
+        private const string AUDIO_SOURCE_NAME = "AudioSource";
+        private readonly AudioSource[] _pool = new AudioSource[10];
         private readonly List<AudioClip> _clips = new List<AudioClip>();
 
         public SoundManager() {
@@ -38,7 +40,7 @@ namespace Code {
         private void ResetAudioSourcesWhenTheyStop() {
             foreach (var source in _pool) {
                 if (!source.isPlaying) {
-                    source.clip            = null;
+                    source.clip = null;
                     source.gameObject.name = AUDIO_SOURCE_NAME;
                 }
             }
@@ -53,15 +55,16 @@ namespace Code {
                         return;
                     }
 
-                    source.clip   = clip;
+                    source.clip = clip;
                     source.volume = volume;
-                    source.loop   = loop;
+                    source.loop = loop;
                     source.Play();
                     source.gameObject.name = name;
                     return;
                 }
             }
         }
+
         private AudioSource GetAudioSource() {
             return _pool.SkipWhile(s => s.isPlaying).FirstOrDefault();
         }
@@ -80,5 +83,14 @@ namespace Code {
         public string[] GetAllAudioClipNames() {
             return _clips.Select(c => c.name).ToArray();
         }
+
+        public void PlayRandomThemeSound(string theme, float volume) {
+            var clips = _clips.Where(c => c.name.Contains(theme));
+            var randomIndex = new System.Random().Next(0, clips.Count());
+            var clip = clips.Select(c => c.name).ElementAt(randomIndex);
+            PlayClip(clip, volume);
+        }
+
     }
+
 }
