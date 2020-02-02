@@ -32,10 +32,10 @@ public class MenuButton : MonoBehaviour {
             Debug.Log("upgrades");
             _timeline.Play();
         }
-        else if (transform.name == "credits") {
+        else if (transform.name == "quit") {
             // credit methods
-            Debug.Log("show credits");
-            _timeline.Play();
+            Debug.Log("quit");
+            //_timeline.Play();
         }
         else if (transform.name == "back") {
             Debug.Log("show credits");
