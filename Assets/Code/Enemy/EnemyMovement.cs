@@ -52,4 +52,10 @@ public class EnemyMovement : MonoBehaviour {
             transform.localRotation *= Quaternion.Euler(0, 180, 0);
         }
     }
+
+    private void OnCollisionEnter(Collision other) {
+        if (other.collider.CompareTag("Bullet")) {
+            Destroy(gameObject);
+        }
+    }
 }
