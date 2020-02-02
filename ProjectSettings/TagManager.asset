@@ -7,6 +7,7 @@ TagManager:
   - selectable
   - Pushable
   - Bullet
+  - Armour
   layers:
   - Default
   - TransparentFX

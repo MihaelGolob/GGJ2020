@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Linq;
 using Code;
 using UnityEngine;
 
@@ -28,8 +30,8 @@ public enum DanceMove {
 
 public class AnimationController : MonoBehaviour {
 
-    [SerializeField] private Level Level = Level.Shoot;
-    [SerializeField] private LocomotionLevel LocomotionLevel = LocomotionLevel.Walk;
+    [SerializeField] private Level Level;
+    [SerializeField] private LocomotionLevel LocomotionLevel;
     [SerializeField] private DanceMove DanceMove = DanceMove.Belly;
     [SerializeField] private bool IsGroundedFlag;
     [SerializeField] private bool IsPushingFlag;
@@ -49,6 +51,7 @@ public class AnimationController : MonoBehaviour {
     private Rigidbody LastPushObject;
     private Grounded Grounded;
     private SoundManager SoundManager;
+    private Transform[] AllArmour;
     private int Locomotion = 1;
     private int Orientation = 1;
     private int LastOrientation = 1;
@@ -60,6 +63,18 @@ public class AnimationController : MonoBehaviour {
         Grounded = GetComponentInChildren<Grounded>();
         SoundManager = FindObjectOfType<SceneConfiguration>().SoundManager;
         LoadLevelStatus();
+        FindAllArmour();
+        HideAllArmour();
+    }
+
+    void FindAllArmour() {
+        AllArmour = GetComponentsInChildren<Transform>().Where(t => t.CompareTag("Armour")).ToArray();
+    }
+
+    void HideAllArmour() {
+        foreach (var armour in AllArmour) {
+            armour.GetChild(0).localScale = Vector3.zero;
+        }
     }
 
     private void Update() {
@@ -220,11 +235,27 @@ public class AnimationController : MonoBehaviour {
         Level = level;
         switch (level) {
             case Level.Run:
+                StartCoroutine(ShowArmour("Tight"));
                 LocomotionLevel = LocomotionLevel.OldRun;
                 break;
             case Level.Jump:
+                StartCoroutine(ShowArmour("Tight"));
+                StartCoroutine(ShowArmour("Leg"));
+                LocomotionLevel = LocomotionLevel.Run;
+                break;
             case Level.Push:
+                StartCoroutine(ShowArmour("Tight"));
+                StartCoroutine(ShowArmour("Leg"));
+                StartCoroutine(ShowArmour("Arm"));
+                StartCoroutine(ShowArmour("Shoulder"));
+                LocomotionLevel = LocomotionLevel.Run;
+                break;
             case Level.Shoot:
+                StartCoroutine(ShowArmour("Tight"));
+                StartCoroutine(ShowArmour("Leg"));
+                StartCoroutine(ShowArmour("Arm"));
+                StartCoroutine(ShowArmour("Shoulder"));
+                StartCoroutine(ShowArmour("Chest"));
                 LocomotionLevel = LocomotionLevel.Run;
                 break;
         }
@@ -244,6 +275,19 @@ public class AnimationController : MonoBehaviour {
     private void LoadLevelStatus() {
         var level = PlayerPrefs.GetInt("LevelStatus", 0);
         LevelUp((Level) level);
+    }
+
+    private IEnumerator ShowArmour(string name) {
+        var armourToShow = AllArmour.Where(t => t.name.Contains(name));
+
+        var scale = 0f;
+        while (scale < 1) {
+            scale += Time.deltaTime;
+            foreach (var armour in armourToShow) {
+                armour.GetChild(0).localScale = Vector3.one * scale;
+            }
+            yield return null;
+        }
     }
 
 #endregion
