@@ -1,11 +1,20 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Code;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
 public class SelectionManager : MonoBehaviour
 {
     [SerializeField] private string selectableTag = "selectable";
+    
+    private SoundManager _sound;
+
+    private void Start() {
+        _sound = FindObjectOfType<SceneConfiguration>().SoundManager;
+        _sound.PlayClip("mainMenu", 1, true);
+    }
 
     // Update is called once per frame
     void Update() {
