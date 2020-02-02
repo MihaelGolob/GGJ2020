@@ -5,8 +5,8 @@ using TMPro;
 using UnityEngine;
 
 public class Key : MonoBehaviour {
-    [SerializeField] private float hoverHeight;
-    [SerializeField] private float speed;
+    [SerializeField] private float hoverHeight = 20;
+    [SerializeField] private float speed = 15;
 
     private bool _move;
     
@@ -18,7 +18,6 @@ public class Key : MonoBehaviour {
 
     private void Start() {
         _move = false;
-        
         _target = new Vector3(transform.position.x, transform.position.y + hoverHeight, transform.position.z);
         
         _startPos = transform.position;
@@ -39,7 +38,7 @@ public class Key : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (other.CompareTag("Player")) {
+        if (other.CompareTag("Player") && !_move) {
             var pl = other.GetComponent<AnimationController>();
             pl.Coins++;
             _startTime = Time.time;
