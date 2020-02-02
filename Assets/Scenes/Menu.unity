@@ -7644,6 +7644,11 @@ PrefabInstance:
       propertyPath: Dance
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 966578333799311041, guid: fa8703b19a427a648b61542b87ad3544,
+        type: 3}
+      propertyPath: DisableZoom
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 966578333799311046, guid: fa8703b19a427a648b61542b87ad3544,
         type: 3}
       propertyPath: m_LocalPosition.x

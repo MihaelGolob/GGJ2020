@@ -41,6 +41,7 @@ public class AnimationController : MonoBehaviour {
     [SerializeField] private Vector3 BulletOffset;
     [SerializeField] private float BulletForce;
     [SerializeField] private bool DisableLocomotion;
+    [SerializeField] private bool DisableZoom;
     [SerializeField] private float FOVMax = 100;
     [SerializeField] private float FOVMin = 30;
     private readonly int PushHash = Animator.StringToHash("Push");
@@ -72,7 +73,8 @@ public class AnimationController : MonoBehaviour {
         SoundManager = FindObjectOfType<SceneConfiguration>().SoundManager;
         FindAllArmour();
         HideAllArmour();
-        SetMinZoom();
+        if(!DisableZoom)
+            SetMinZoom();
         LoadLevelStatus();
 
         Coins = 0;
@@ -106,7 +108,8 @@ public class AnimationController : MonoBehaviour {
             Shoot();
         }
         MakeOneDanceMove();
-        ZoomInOut();
+        if(!DisableZoom)
+            ZoomInOut();
     }
 
     private void CheckGround() {
