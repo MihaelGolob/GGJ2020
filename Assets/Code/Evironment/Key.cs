@@ -32,8 +32,10 @@ public class Key : MonoBehaviour {
             
             transform.position = Vector3.Lerp(_startPos, _target, fractOfJourney);   
         }
-        
-        // TODO destroy game object when at the top
+
+        if (transform.position.y > _target.y) {
+            Destroy(gameObject);
+        }
     }
 
     private void OnTriggerEnter(Collider other) {
