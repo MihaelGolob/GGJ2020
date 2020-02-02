@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using Code;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum Level {
 
@@ -24,7 +25,8 @@ public enum LocomotionLevel {
 
 public enum DanceMove {
 
-    Belly = 1
+    Win = 1,
+    Lose = 2
 
 }
 
@@ -32,15 +34,14 @@ public class AnimationController : MonoBehaviour {
 
     [SerializeField] private Level Level;
     [SerializeField] private LocomotionLevel LocomotionLevel;
-    [SerializeField] private DanceMove DanceMove = DanceMove.Belly;
+    [SerializeField] private DanceMove DanceMove = DanceMove.Win;
     [SerializeField] private bool IsGroundedFlag;
     [SerializeField] private bool IsPushingFlag;
     [SerializeField] private Vector3 JumpForce;
-    [SerializeField] private bool Dance;
     [SerializeField] private GameObject Bullets;
     [SerializeField] private Vector3 BulletOffset;
     [SerializeField] private float BulletForce;
-    [SerializeField] private bool DisableLocomotion;
+    [SerializeField] public bool DisableLocomotion;
     [SerializeField] private bool DisableZoom;
     [SerializeField] private float FOVMax = 100;
     [SerializeField] private float FOVMin = 30;
@@ -60,10 +61,14 @@ public class AnimationController : MonoBehaviour {
     private int Orientation = 1;
     private int LastOrientation = 1;
     private bool PushButtonDown = false;
-    
+
     public int Coins {
-        get { return PlayerPrefs.GetInt("Coins"); }
-        set { PlayerPrefs.SetInt("Coins", value); }
+        get {
+            return PlayerPrefs.GetInt("Coins", 0);
+        }
+        set {
+            PlayerPrefs.SetInt("Coins", value);
+        }
     }
 
     private void Awake() {
@@ -73,12 +78,8 @@ public class AnimationController : MonoBehaviour {
         SoundManager = FindObjectOfType<SceneConfiguration>().SoundManager;
         FindAllArmour();
         HideAllArmour();
-        if(!DisableZoom)
-            SetMinZoom();
+        if (!DisableZoom) SetMinZoom();
         LoadLevelStatus();
-
-        Coins = 0;
-        PlayerPrefs.SetInt("Coins", 0);
     }
 
     void FindAllArmour() {
@@ -107,9 +108,7 @@ public class AnimationController : MonoBehaviour {
             UnsetPushing();
             Shoot();
         }
-        MakeOneDanceMove();
-        if(!DisableZoom)
-            ZoomInOut();
+        if (!DisableZoom) ZoomInOut();
     }
 
     private void CheckGround() {
@@ -143,7 +142,7 @@ public class AnimationController : MonoBehaviour {
         float GetLocomotionMultiplyer() {
             switch (LocomotionLevel) {
                 case LocomotionLevel.Walk:
-                    return 1.8f;
+                    return 3.8f;
                 case LocomotionLevel.OldRun:
                     return 4.5f;
                 case LocomotionLevel.Run:
@@ -175,14 +174,6 @@ public class AnimationController : MonoBehaviour {
         if (LastPushObject != null && !IsPushingFlag) {
             LastPushObject.mass = 100_000;
         }
-    }
-
-    private void MakeOneDanceMove() {
-        Animator.SetInteger(DanceHash, 0);
-        if (!Dance) return;
-
-        Animator.SetInteger(DanceHash, (int) DanceMove);
-        Dance = false;
     }
 
     private void ZoomInOut() {
@@ -330,6 +321,27 @@ public class AnimationController : MonoBehaviour {
 
     private bool ProbabilityChance(float percentage) {
         return new System.Random().Next(0, 1_000_000) <= percentage * 10_000;
+    }
+
+    public void Win() {
+        Animator.SetInteger(LocomotionHash, 0);
+        Animator.SetInteger(DanceHash, (int) DanceMove.Win);
+        ChangeSceneAfter("Menu", 9.5f);
+    }
+
+    public void Lose() {
+        Animator.SetInteger(LocomotionHash, 0);
+        Animator.SetInteger(DanceHash, (int) DanceMove.Lose);
+        ChangeSceneAfter("Menu", 8f);
+    }
+
+    private void ChangeSceneAfter(string sceneName, float seconds) {
+        StartCoroutine(WaitFor());
+
+        IEnumerator WaitFor() {
+            yield return new WaitForSeconds(seconds);
+            SceneManager.LoadScene(sceneName);
+        }
     }
 
 }
