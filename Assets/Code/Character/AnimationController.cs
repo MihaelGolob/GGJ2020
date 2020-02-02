@@ -117,15 +117,15 @@ public class AnimationController : MonoBehaviour {
 
     private void ApplyLocomotionInput() {
         Locomotion = 0;
-        if (Input.GetButton("Horizontal") || Input.GetButton("Vertical")) {
+        if (Input.GetButton("Horizontal")) {
             Locomotion = (int) LocomotionLevel;
         }
         Animator.SetInteger(LocomotionHash, Locomotion);
     }
 
     private void ApplyOrientation() {
-        int newOrientation = Input.GetAxisRaw("Vertical") > 0 ? 1 : -1;
-        if (newOrientation != LastOrientation && Math.Abs(Input.GetAxisRaw("Vertical")) > 0.1f && IsGroundedFlag) {
+        int newOrientation = Input.GetAxisRaw("Horizontal") > 0 ? 1 : -1;
+        if (newOrientation != LastOrientation && Math.Abs(Input.GetAxisRaw("Horizontal")) > 0.1f && IsGroundedFlag) {
             Orientation = newOrientation;
         }
         transform.rotation = Quaternion.Euler(0, Orientation == -1 ? 180 : 0, 0);
@@ -136,7 +136,7 @@ public class AnimationController : MonoBehaviour {
         if (!IsGroundedFlag) return;
         var position = transform.position;
         position.x = 0;
-        position.z += GetLocomotionMultiplyer() * Time.deltaTime * Input.GetAxis("Vertical");
+        position.z += GetLocomotionMultiplyer() * Time.deltaTime * Input.GetAxis("Horizontal");
         transform.position = position;
 
         float GetLocomotionMultiplyer() {
