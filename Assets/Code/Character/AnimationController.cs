@@ -95,6 +95,7 @@ public class AnimationController : MonoBehaviour {
     }
 
     private void ApplyLocomotion() {
+        if (!IsGroundedFlag) return;
         var position = transform.position;
         position.x = 0;
         position.z += GetLocomotionMultiplyer() * Time.deltaTime * Input.GetAxis("Vertical");
@@ -125,7 +126,7 @@ public class AnimationController : MonoBehaviour {
 
     private void SetPushButtonDown() {
         PushButtonDown = false;
-        if (Input.GetButtonDown("Push")) {
+        if (Input.GetButton("Push")) {
             PushButtonDown = true;
         }
     }
