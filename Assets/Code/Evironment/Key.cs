@@ -40,8 +40,8 @@ public class Key : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Player")) {
-            var pl = other.GetComponent<Player>();
-            pl.Keys++;
+            var pl = other.GetComponent<AnimationController>();
+            pl.Coins++;
             _startTime = Time.time;
             _move = true;
         }
