@@ -104,7 +104,7 @@ public class AnimationController : MonoBehaviour {
             ApplyOrientation();
             ApplyLocomotion();
             Jump();
-            SetPushButtonDown();
+            SetPushButton();
             UnsetPushing();
             Shoot();
         }
@@ -163,10 +163,12 @@ public class AnimationController : MonoBehaviour {
         Animator.SetTrigger(JumpHash);
     }
 
-    private void SetPushButtonDown() {
-        PushButtonDown = false;
-        if (Input.GetButton("Push")) {
+    private void SetPushButton() {
+        if (Input.GetButtonDown("Push")) {
             PushButtonDown = true;
+        }
+        if (Input.GetButtonUp("Push")) {
+            PushButtonDown = false;
         }
     }
 
@@ -211,7 +213,7 @@ public class AnimationController : MonoBehaviour {
     }
 
     void Push(Collider other) {
-        if ((PushButtonDown || Input.GetButton("Push")) && other.CompareTag("Pushable") && Level >= Level.Push) {
+        if (PushButtonDown && other.CompareTag("Pushable") && Level >= Level.Push) {
             IsPushingFlag = true;
             Animator.SetBool(PushHash, true);
             other.GetComponent<Rigidbody>().mass = 0.01f;
