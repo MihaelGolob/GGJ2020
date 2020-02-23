@@ -8,7 +8,7 @@ using UnityEngine.PlayerLoop;
 public class SelectionManager : MonoBehaviour
 {
     [SerializeField] private string selectableTag = "selectable";
-    
+
     private SoundManager _sound;
 
     private void Start() {

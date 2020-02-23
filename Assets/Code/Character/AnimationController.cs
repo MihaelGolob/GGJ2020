@@ -61,7 +61,7 @@ public class AnimationController : MonoBehaviour {
     private int Orientation = 1;
     private int LastOrientation = 1;
     private bool PushButtonDown = false;
-
+    
     public int Coins {
         get {
             return PlayerPrefs.GetInt("Coins", 0);
