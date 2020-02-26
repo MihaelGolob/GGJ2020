@@ -31,9 +31,6 @@ public class MenuButton : MonoBehaviour {
     }
 
     public IEnumerator click() {
-        // call functions here
-        _block = false;
-    
         if (transform.name == "start") {
             // start methods
             Debug.Log("start game");
@@ -58,7 +55,7 @@ public class MenuButton : MonoBehaviour {
             SceneManager.LoadScene("Tutorial");
         }
         else if (transform.name == "upRun") {
-            if (_playerCont.Coins >= 5) {
+            if (_playerCont.Coins >= 5 && !_clicked) {
                 _playerCont.Coins -= 5;
                 _playerCont.LevelUp(Level.Run);
             }
@@ -67,7 +64,7 @@ public class MenuButton : MonoBehaviour {
             }
         }
         else if (transform.name == "upJump") {
-            if (_playerCont.Coins >= 15) {
+            if (_playerCont.Coins >= 15 && !_clicked) {
                 _playerCont.Coins -= 15;
                 _playerCont.LevelUp(Level.Jump);   
             }
@@ -76,7 +73,7 @@ public class MenuButton : MonoBehaviour {
             }
         }
         else if (transform.name == "upPush") {
-            if (_playerCont.Coins >= 40) {
+            if (_playerCont.Coins >= 40 && !_clicked) {
                 _playerCont.Coins -= 40;
                 _playerCont.LevelUp(Level.Push);
             }
@@ -85,7 +82,7 @@ public class MenuButton : MonoBehaviour {
             }
         }
         else if (transform.name == "upShoot") {
-            if (_playerCont.Coins >= 100) {
+            if (_playerCont.Coins >= 100 && !_clicked) {
                 _playerCont.Coins -= 100;
                 _playerCont.LevelUp(Level.Shoot);
             }
@@ -114,7 +111,7 @@ public class MenuButton : MonoBehaviour {
                 }     
             }
         }
-
+        
         _clicked = true;
         
         if(!stayIn)
