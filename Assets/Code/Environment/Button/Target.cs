@@ -27,6 +27,8 @@ public class Target : MonoBehaviour {
                 var bridge = door.GetComponent<Bridge>();
                 StartCoroutine(bridge.lower());
             }
+            gameObject.transform.GetChild(0).gameObject.SetActive(false);
+            GetComponent<Collider>().enabled = false;
         }
     }
 }

@@ -13,6 +13,15 @@ namespace Code {
             DontDestroyOnLoad(this);
             ApplyExistingSceneConfiguration();
             InitializeComponents();
+            SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
+        }
+
+        private void SceneManagerOnActiveSceneChanged(Scene oldScene, Scene newScene) {
+            switch (newScene.name) {
+                case "Tutorial":
+                    FindObjectOfType<AnimationController>().LevelUp(Level.Shoot, false);
+                    break;
+            }
         }
 
         private void ApplyExistingSceneConfiguration() {

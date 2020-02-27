@@ -1,80 +1,70 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using Cinemachine;
 using Code;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public enum Level {
-
     Walk,
     Run,
     Jump,
     Push,
     Shoot
-
 }
 
 public enum LocomotionLevel {
-
-    Walk = 1,
+    Walk   = 1,
     OldRun = 2,
-    Run = 3
-
+    Run    = 3
 }
 
 public enum DanceMove {
-
-    Win = 1,
+    Win  = 1,
     Lose = 2
-
 }
 
 public class AnimationController : MonoBehaviour {
+    [SerializeField] private Level                    Level;
+    [SerializeField] private LocomotionLevel          LocomotionLevel;
+    [SerializeField] private DanceMove                DanceMove = DanceMove.Win;
+    [SerializeField] private bool                     IsGroundedFlag;
+    [SerializeField] private bool                     IsPushingFlag;
+    [SerializeField] private Vector3                  JumpForce;
+    [SerializeField] private GameObject               Bullets;
+    [SerializeField] private Vector3                  BulletOffset;
+    [SerializeField] private float                    BulletForce;
+    [SerializeField] public  bool                     DisableLocomotion;
+    [SerializeField] private bool                     DisableZoom;
+    [SerializeField] private float                    FOVMax         = 100;
+    [SerializeField] private float                    FOVMin         = 30;
+    private readonly         int                      PushHash       = Animator.StringToHash("Push");
+    private readonly         int                      JumpHash       = Animator.StringToHash("Jump");
+    private readonly         int                      LocomotionHash = Animator.StringToHash("Locomotion");
+    private readonly         int                      DanceHash      = Animator.StringToHash("Dance");
+    private readonly         int                      ShootHash      = Animator.StringToHash("Shoot");
+    private                  Animator                 Animator;
+    private                  Rigidbody                Rigidbody;
+    private                  Rigidbody                LastPushObject;
+    private                  Grounded                 Grounded;
+    private                  SoundManager             SoundManager;
+    private                  Transform[]              AllArmour;
+    private                  CinemachineVirtualCamera Camera;
+    private                  int                      Locomotion      = 1;
+    private                  int                      Orientation     = 1;
+    private                  int                      LastOrientation = 1;
+    private                  bool                     PushButtonDown  = false;
 
-    [SerializeField] private Level Level;
-    [SerializeField] private LocomotionLevel LocomotionLevel;
-    [SerializeField] private DanceMove DanceMove = DanceMove.Win;
-    [SerializeField] private bool IsGroundedFlag;
-    [SerializeField] private bool IsPushingFlag;
-    [SerializeField] private Vector3 JumpForce;
-    [SerializeField] private GameObject Bullets;
-    [SerializeField] private Vector3 BulletOffset;
-    [SerializeField] private float BulletForce;
-    [SerializeField] public bool DisableLocomotion;
-    [SerializeField] private bool DisableZoom;
-    [SerializeField] private float FOVMax = 100;
-    [SerializeField] private float FOVMin = 30;
-    private readonly int PushHash = Animator.StringToHash("Push");
-    private readonly int JumpHash = Animator.StringToHash("Jump");
-    private readonly int LocomotionHash = Animator.StringToHash("Locomotion");
-    private readonly int DanceHash = Animator.StringToHash("Dance");
-    private readonly int ShootHash = Animator.StringToHash("Shoot");
-    private Animator Animator;
-    private Rigidbody Rigidbody;
-    private Rigidbody LastPushObject;
-    private Grounded Grounded;
-    private SoundManager SoundManager;
-    private Transform[] AllArmour;
-    private Camera Camera;
-    private int Locomotion = 1;
-    private int Orientation = 1;
-    private int LastOrientation = 1;
-    private bool PushButtonDown = false;
-    
     public int Coins {
-        get {
-            return PlayerPrefs.GetInt("Coins", 0);
-        }
-        set {
-            PlayerPrefs.SetInt("Coins", value);
-        }
+        get { return PlayerPrefs.GetInt("Coins", 0); }
+        set { PlayerPrefs.SetInt("Coins", value); }
     }
 
     private void Awake() {
-        Animator = GetComponent<Animator>();
-        Rigidbody = GetComponent<Rigidbody>();
-        Grounded = GetComponentInChildren<Grounded>();
+        Animator     = GetComponent<Animator>();
+        Rigidbody    = GetComponent<Rigidbody>();
+        Grounded     = GetComponentInChildren<Grounded>();
         SoundManager = FindObjectOfType<SceneConfiguration>().SoundManager;
         FindAllArmour();
         HideAllArmour();
@@ -93,11 +83,12 @@ public class AnimationController : MonoBehaviour {
     }
 
     void SetMinZoom() {
-        Camera = FindObjectOfType<Camera>();
-        Camera.fieldOfView = FOVMin;
+        Camera                    = FindObjectOfType<CinemachineVirtualCamera>();
+        Camera.m_Lens.FieldOfView = FOVMin;
     }
 
     private void Update() {
+        GlobalInput();
         CheckGround();
         if (!DisableLocomotion) {
             ApplyLocomotionInput();
@@ -108,7 +99,16 @@ public class AnimationController : MonoBehaviour {
             UnsetPushing();
             Shoot();
         }
+
         if (!DisableZoom) ZoomInOut();
+    }
+
+    private void GlobalInput() {
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (SceneManager.GetActiveScene().name != "Menu") {
+                SceneManager.LoadScene("Menu");
+            }
+        }
     }
 
     private void CheckGround() {
@@ -120,6 +120,7 @@ public class AnimationController : MonoBehaviour {
         if (Input.GetButton("Horizontal")) {
             Locomotion = (int) LocomotionLevel;
         }
+
         Animator.SetInteger(LocomotionHash, Locomotion);
     }
 
@@ -128,26 +129,28 @@ public class AnimationController : MonoBehaviour {
         if (newOrientation != LastOrientation && Math.Abs(Input.GetAxisRaw("Horizontal")) > 0.1f && IsGroundedFlag) {
             Orientation = newOrientation;
         }
+
         transform.rotation = Quaternion.Euler(0, Orientation == -1 ? 180 : 0, 0);
-        LastOrientation = Orientation;
+        LastOrientation    = Orientation;
     }
 
     private void ApplyLocomotion() {
         if (!IsGroundedFlag) return;
         var position = transform.position;
-        position.x = 0;
-        position.z += GetLocomotionMultiplyer() * Time.deltaTime * Input.GetAxis("Horizontal");
-        transform.position = position;
+        position.x         =  0;
+        position.z         += GetLocomotionMultiplyer() * Time.deltaTime * Input.GetAxis("Horizontal");
+        transform.position =  position;
 
         float GetLocomotionMultiplyer() {
             switch (LocomotionLevel) {
-                case LocomotionLevel.Walk:
-                    return 3.8f;
-                case LocomotionLevel.OldRun:
-                    return 4.5f;
-                case LocomotionLevel.Run:
-                    return 7.4f;
+            case LocomotionLevel.Walk:
+                return 3.8f;
+            case LocomotionLevel.OldRun:
+                return 4.5f;
+            case LocomotionLevel.Run:
+                return 7.4f;
             }
+
             return 1f;
         }
     }
@@ -155,6 +158,7 @@ public class AnimationController : MonoBehaviour {
     private void Jump() {
         if (Level < Level.Jump) return;
         if (!IsGroundedFlag) return;
+        if (IsPushingFlag) return;
         if (!Input.GetButtonDown("Jump")) return;
         var force = new Vector3(0, 1, Orientation);
         force.y *= JumpForce.y;
@@ -167,6 +171,7 @@ public class AnimationController : MonoBehaviour {
         if (Input.GetButtonDown("Push")) {
             PushButtonDown = true;
         }
+
         if (Input.GetButtonUp("Push")) {
             PushButtonDown = false;
         }
@@ -180,12 +185,13 @@ public class AnimationController : MonoBehaviour {
 
     private void ZoomInOut() {
         if (Input.GetKey(KeyCode.Q)) {
-            if (Camera.fieldOfView < FOVMax) {
-                Camera.fieldOfView += Time.deltaTime * 70;
+            if (Camera.m_Lens.FieldOfView < FOVMax) {
+                Camera.m_Lens.FieldOfView += Time.deltaTime * 70;
             }
-        } else {
-            if (Camera.fieldOfView > FOVMin) {
-                Camera.fieldOfView -= Time.deltaTime * 70;
+        }
+        else {
+            if (Camera.m_Lens.FieldOfView > FOVMin) {
+                Camera.m_Lens.FieldOfView -= Time.deltaTime * 70;
             }
         }
     }
@@ -197,7 +203,7 @@ public class AnimationController : MonoBehaviour {
         }
     }
 
-#region Collsions
+    #region Collsions
 
     private void OnTriggerEnter(Collider other) {
         Push(other);
@@ -207,37 +213,36 @@ public class AnimationController : MonoBehaviour {
         Push(other);
     }
 
-    private void OnTriggerExit(Collider other) {
-        Animator.SetBool(PushHash, false);
-        if (LastPushObject != null) LastPushObject.mass = 100_000;
-    }
-
     void Push(Collider other) {
         if (PushButtonDown && other.CompareTag("Pushable") && Level >= Level.Push) {
             IsPushingFlag = true;
             Animator.SetBool(PushHash, true);
             other.GetComponent<Rigidbody>().mass = 0.01f;
-            LastPushObject = other.GetComponent<Rigidbody>();
-        } else {
+            LastPushObject                       = other.GetComponent<Rigidbody>();
+            Debug.Log("Pushing");
+        }
+        else if (!PushButtonDown && other.CompareTag("Pushable")) {
             IsPushingFlag = false;
             Animator.SetBool(PushHash, false);
+            other.GetComponent<Rigidbody>().mass = 100_000;
+            Debug.Log("Not Pushing");
         }
     }
 
-#endregion
+    #endregion
 
-#region AnimationEvents
+    #region AnimationEvents
 
     void ThrowApple() {
         var bullets = Instantiate(Bullets);
         foreach (var bullet in bullets.GetComponentsInChildren<Rigidbody>()) {
             if (bullet.gameObject.CompareTag("Bullet")) {
                 var transform = this.transform;
-                var forward = transform.forward;
-                bullet.transform.position = transform.position + forward * BulletOffset.z + transform.up * BulletOffset.y;
+                var forward   = transform.forward;
+                bullet.transform.position =
+                    transform.position + forward * BulletOffset.z + transform.up * BulletOffset.y;
                 bullet.AddForce(forward * BulletForce, ForceMode.Impulse);
             }
-
         }
     }
 
@@ -254,43 +259,45 @@ public class AnimationController : MonoBehaviour {
         SoundManager.PlayRandomThemeSound("pushing", 0.1f);
     }
 
-#endregion
+    #endregion
 
-#region Leveling Up and Down
+    #region Leveling Up and Down
 
-    public void LevelUp(Level level) {
+    public void LevelUp(Level level, bool save = true) {
         Level = level;
         switch (level) {
-            case Level.Run:
-                StartCoroutine(ShowArmour("Tight"));
-                LocomotionLevel = LocomotionLevel.OldRun;
-                break;
-            case Level.Jump:
-                StartCoroutine(ShowArmour("Tight"));
-                StartCoroutine(ShowArmour("Leg"));
-                LocomotionLevel = LocomotionLevel.Run;
-                break;
-            case Level.Push:
-                StartCoroutine(ShowArmour("Tight"));
-                StartCoroutine(ShowArmour("Leg"));
-                StartCoroutine(ShowArmour("Arm"));
-                StartCoroutine(ShowArmour("Shoulder"));
-                LocomotionLevel = LocomotionLevel.Run;
-                break;
-            case Level.Shoot:
-                StartCoroutine(ShowArmour("Tight"));
-                StartCoroutine(ShowArmour("Leg"));
-                StartCoroutine(ShowArmour("Arm"));
-                StartCoroutine(ShowArmour("Shoulder"));
-                StartCoroutine(ShowArmour("Chest"));
-                LocomotionLevel = LocomotionLevel.Run;
-                break;
+        case Level.Run:
+            StartCoroutine(ShowArmour("Tight"));
+            LocomotionLevel = LocomotionLevel.OldRun;
+            break;
+        case Level.Jump:
+            StartCoroutine(ShowArmour("Tight"));
+            StartCoroutine(ShowArmour("Leg"));
+            LocomotionLevel = LocomotionLevel.Run;
+            break;
+        case Level.Push:
+            StartCoroutine(ShowArmour("Tight"));
+            StartCoroutine(ShowArmour("Leg"));
+            StartCoroutine(ShowArmour("Arm"));
+            StartCoroutine(ShowArmour("Shoulder"));
+            LocomotionLevel = LocomotionLevel.Run;
+            break;
+        case Level.Shoot:
+            StartCoroutine(ShowArmour("Tight"));
+            StartCoroutine(ShowArmour("Leg"));
+            StartCoroutine(ShowArmour("Arm"));
+            StartCoroutine(ShowArmour("Shoulder"));
+            StartCoroutine(ShowArmour("Chest"));
+            LocomotionLevel = LocomotionLevel.Run;
+            break;
         }
-        SaveLevelStatus();
+
+        if (save)
+            SaveLevelStatus();
     }
 
     public void ResetAllLevels() {
-        Level = Level.Walk;
+        Level           = Level.Walk;
         LocomotionLevel = LocomotionLevel.Walk;
         SaveLevelStatus();
     }
@@ -315,11 +322,12 @@ public class AnimationController : MonoBehaviour {
             foreach (var armour in armourToShow) {
                 armour.GetChild(0).localScale = Vector3.one * scale;
             }
+
             yield return null;
         }
     }
 
-#endregion
+    #endregion
 
     private bool ProbabilityChance(float percentage) {
         return new System.Random().Next(0, 1_000_000) <= percentage * 10_000;
@@ -345,5 +353,4 @@ public class AnimationController : MonoBehaviour {
             SceneManager.LoadScene(sceneName);
         }
     }
-
 }

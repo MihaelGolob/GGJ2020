@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Code {
 
@@ -13,6 +14,14 @@ namespace Code {
         public SoundManager() {
             FindAllClips();
             InitializePool();
+            SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
+        }
+
+        private void SceneManagerOnActiveSceneChanged(Scene oldScene, Scene newScene) {
+            foreach (var clip in _pool) {
+                if(clip.isPlaying) 
+                    clip.GetComponent<AudioSource>().Stop();
+            }
         }
 
         private void FindAllClips() {
@@ -91,6 +100,7 @@ namespace Code {
             PlayClip(clip, volume);
         }
 
+        
     }
 
 }
